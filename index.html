@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fotbal Šťastný - E-shop</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7f6;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        header img {
+            max-width: 200px;
+            height: auto;
+            border-radius: 50%;
+        }
+        h1 {
+            color: #1b4332;
+            margin-top: 10px;
+        }
+        .product-list {
+            margin-bottom: 30px;
+        }
+        .product-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            border-bottom: 1px solid #e9ecef;
+        }
+        .product-info {
+            flex: 1;
+        }
+        .product-name {
+            font-weight: bold;
+            font-size: 1.1em;
+            color: #2d6a4f;
+        }
+        .product-desc {
+            font-size: 0.9em;
+            color: #6c757d;
+        }
+        .product-price {
+            font-weight: bold;
+            margin-right: 20px;
+            color: #1b4332;
+        }
+        .quantity-input {
+            width: 60px;
+            padding: 5px;
+            border-radius: 5px;
+            border: 1px solid #ced4da;
+            text-align: center;
+        }
+        .summary {
+            background-color: #e8f5e9;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 1.1em;
+            font-weight: bold;
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ced4da;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+        .btn-submit {
+            background-color: #2d6a4f;
+            color: white;
+            border: none;
+            padding: 15px 20px;
+            font-size: 1.1em;
+            font-weight: bold;
+            width: 100%;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .btn-submit:hover {
+            background-color: #1b4332;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <img src="logo.png" alt="Logo Fotbal Šťastný">
+        <h1>Fotbal Šťastný</h1>
+        <p>Prvotřídní fotbalové míče pro váš nejlepší zápas</p>
+    </header>
+
+    <section>
+        <h2>Nabídka míčů</h2>
+        <div id="products" class="product-list">
+            </div>
+    </section>
+
+    <div class="summary">
+        <span>Celkem kusů: <span id="total-count">0</span></span>
+        <span>Celková cena: <span id="total-price">0</span> Kč</span>
+    </div>
+
+    <section>
+        <h2>Objednávkový formulář</h2>
+        <form id="order-form">
+            <div class="form-group">
+                <label for="name">Jméno:</label>
+                <input type="text" id="name" required>
+            </div>
+            <div class="form-group">
+                <label for="surname">Příjmení:</label>
+                <input type="text" id="surname" required>
+            </div>
+            <div class="form-group">
+                <label for="email">E-mail:</label>
+                <input type="email" id="email" required>
+            </div>
+            <div class="form-group">
+                <label for="phone">Telefon:</label>
+                <input type="tel" id="phone" required>
+            </div>
+            
+            <button type="button" class="btn-submit" onclick="sendOrder()">ODESLAT OBJEDNÁVKU</button>
+        </form>
+    </section>
+</div>
+
+<script>
+    let productsData = [];
+
+    // Načtení dat z externího CSV souboru
+    fetch('products.csv')
+        .then(response => response.text())
+        .then(text => {
+            const lines = text.split('\n');
+            const container = document.getElementById('products');
+            
+            // Přeskočíme hlavičku (index 0) a projdeme řádky
+            for (let i = 1; i < lines.length; i++) {
+                if (!lines[i].trim()) continue;
+                const columns = lines[i].split(';');
+                
+                const product = {
+                    id: columns[0],
+                    name: columns[1],
+                    price: parseInt(columns[2]),
+                    desc: columns[3]
+                };
+                productsData.push(product);
+
+                // Vykreslení produktu do HTML
+                container.innerHTML += `
+                    <div class="product-item">
+                        <div class="product-info">
+                            <div class="product-name">${product.name}</div>
+                            <div class="product-desc">${product.desc}</div>
+                        </div>
+                        <div class="product-price">${product.price} Kč</div>
+                        <input type="number" class="quantity-input" id="qty-${product.id}" min="0" value="0" onchange="calculateTotals()">
+                    </div>
+                `;
+            }
+        })
+        .catch(err => console.error("Chyba při načítání CSV:", err));
+
+    // Funkce pro průběžný výpočet ceny a kusů
+    function calculateTotals() {
+        let totalCount = 0;
+        let totalPrice = 0;
+
+        productsData.forEach(product => {
+            const qtyInput = document.getElementById(`qty-${product.id}`);
+            const qty = parseInt(qtyInput.value) || 0;
+            
+            if (qty > 0) {
+                totalCount += qty;
+                totalPrice += (qty * product.price);
+            }
+        });
+
+        document.getElementById('total-count').innerText = totalCount;
+        document.getElementById('total-price').innerText = totalPrice;
+    }
+
+    // Funkce pro odeslání objednávky přes e-mailového klienta
+    function sendOrder() {
+        const name = document.getElementById('name').value.trim();
+        const surname = document.getElementById('surname').value.trim();
+        const email = document.getElementById('email').value.trim();
+        const phone = document.getElementById('phone').value.trim();
+
+        // Validace vyplnění kontaktů
+        if (!name || !surname || !email || !phone) {
+            alert("Prosím, vyplňte všechny kontaktní údaje (Jméno, Příjmení, E-mail a Telefon).");
+            return;
+        }
+
+        let orderedItemsText = "";
+        let totalCount = 0;
+        let totalPrice = 0;
+
+        productsData.forEach(product => {
+            const qty = parseInt(document.getElementById(`qty-${product.id}`).value) || 0;
+            if (qty > 0) {
+                orderedItemsText += `- ${product.name}: ${qty}x (${qty * product.price} Kč)\n`;
+                totalCount += qty;
+                totalPrice += (qty * product.price);
+            }
+        });
+
+        if (totalCount === 0) {
+            alert("Vyberte prosím alespoň jeden míč k objednání.");
+            return;
+        }
+
+        // Sestavení textu e-mailu dle zadání
+        const recipient = "app@kostka-skola.cz";
+        const subject = encodeURIComponent(`Objednávka - Fotbal Šťastný - ${name} ${surname}`);
+        
+        let bodyText = `Shrnutí objednávky firmy Fotbal Šťastný:\n\n`;
+        bodyText += `Zákazník: ${name} ${surname}\n`;
+        bodyText += `E-mail: ${email}\n`;
+        bodyText += `Telefon: ${phone}\n\n`;
+        bodyText += `Objednané zboží:\n${orderedItemsText}\n`;
+        bodyText += `Celkový počet kusů: ${totalCount}\n`;
+        bodyText += `Celková cena: ${totalPrice} Kč\n`;
+
+        const body = encodeURIComponent(bodyText);
+
+        // Otevření lokálního e-mailového klienta
+        window.location.href = `mailto:${recipient}?subject=${subject}&body=${body}`;
+    }
+</script>
+</body>
+</html>
