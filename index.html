@@ -155,42 +155,36 @@
 </div>
 
 <script>
-    let productsData = [];
+    // Produkty vložené přímo v kódu, aby se předešlo chybám s načítáním souboru
+    const productsData = [
+        { id: "1", name: "Tréninkový míč Klasik", price: 499, desc: "Odolný fotbalový míč ideální pro každodenní trénink." },
+        { id: "2", name: "Zápasový míč Profesionál", price: 1290, desc: "Certifikovaný zápasový míč s optimálními letovými vlastnostmi." },
+        { id: "3", name: "Retro kožený míč", price: 890, desc: "Stylový míč z pravé kůže pro sběratele a pamětníky." },
+        { id: "4", name: "Futsalový míč Halový", price: 550, desc: "Míč se sníženým odskokem určený speciálně do haly." },
+        { id: "5", name: "Dětský odlehčený míč", price: 390, desc: "Speciální lehký míč pro nejmenší fotbalisty a bezpečné hraní." },
+        { id: "6", name: "Plážový fotbalový míč", price: 450, desc: "Měkký voděodolný míč ideální na pláž a letní pohodu u vody." },
+        { id: "7", name: "Zimní reflexní míč", price: 690, desc: "Výrazný oranžový míč pro skvělou viditelnost na sněhu a za šera." },
+        { id: "8", name: "Sběratelský zlatý míč", price: 1490, desc: "Limitovaná edice v luxusním designu pro opravdové fotbalové fanoušku." }
+    ];
 
-    // Načtení dat z externího CSV souboru
-    fetch('products.csv')
-        .then(response => response.text())
-        .then(text => {
-            const lines = text.split('\n');
-            const container = document.getElementById('products');
-            
-            // Přeskočíme hlavičku (index 0) a projdeme řádky
-            for (let i = 1; i < lines.length; i++) {
-                if (!lines[i].trim()) continue;
-                const columns = lines[i].split(';');
-                
-                const product = {
-                    id: columns[0],
-                    name: columns[1],
-                    price: parseInt(columns[2]),
-                    desc: columns[3]
-                };
-                productsData.push(product);
-
-                // Vykreslení produktu do HTML
-                container.innerHTML += `
-                    <div class="product-item">
-                        <div class="product-info">
-                            <div class="product-name">${product.name}</div>
-                            <div class="product-desc">${product.desc}</div>
-                        </div>
-                        <div class="product-price">${product.price} Kč</div>
-                        <input type="number" class="quantity-input" id="qty-${product.id}" min="0" value="0" onchange="calculateTotals()">
+    // Funkce pro zobrazení produktů na stránce
+    function renderProducts() {
+        const container = document.getElementById('products');
+        container.innerHTML = ""; // Vyčištění kontejneru
+        
+        productsData.forEach(product => {
+            container.innerHTML += `
+                <div class="product-item">
+                    <div class="product-info">
+                        <div class="product-name">${product.name}</div>
+                        <div class="product-desc">${product.desc}</div>
                     </div>
-                `;
-            }
-        })
-        .catch(err => console.error("Chyba při načítání CSV:", err));
+                    <div class="product-price">${product.price} Kč</div>
+                    <input type="number" class="quantity-input" id="qty-${product.id}" min="0" value="0" onchange="calculateTotals()">
+                </div>
+            `;
+        });
+    }
 
     // Funkce pro průběžný výpočet ceny a kusů
     function calculateTotals() {
@@ -259,6 +253,9 @@
         // Otevření lokálního e-mailového klienta
         window.location.href = `mailto:${recipient}?subject=${subject}&body=${body}`;
     }
+
+    // Spuštění vykreslení produktů při načtení stránky
+    window.onload = renderProducts;
 </script>
 </body>
 </html>
