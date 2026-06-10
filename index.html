@@ -155,7 +155,7 @@
 </div>
 
 <script>
-    // Produkty vložené přímo v kódu, aby se předešlo chybám s načítáním souboru
+    // Produkty jsou pevně vložené v kódu, aby se předešlo chybám s načítáním CSV souboru
     const productsData = [
         { id: "1", name: "Tréninkový míč Klasik", price: 499, desc: "Odolný fotbalový míč ideální pro každodenní trénink." },
         { id: "2", name: "Zápasový míč Profesionál", price: 1290, desc: "Certifikovaný zápasový míč s optimálními letovými vlastnostmi." },
@@ -164,13 +164,13 @@
         { id: "5", name: "Dětský odlehčený míč", price: 390, desc: "Speciální lehký míč pro nejmenší fotbalisty a bezpečné hraní." },
         { id: "6", name: "Plážový fotbalový míč", price: 450, desc: "Měkký voděodolný míč ideální na pláž a letní pohodu u vody." },
         { id: "7", name: "Zimní reflexní míč", price: 690, desc: "Výrazný oranžový míč pro skvělou viditelnost na sněhu a za šera." },
-        { id: "8", name: "Sběratelský zlatý míč", price: 1490, desc: "Limitovaná edice v luxusním designu pro opravdové fotbalové fanoušku." }
+        { id: "8", name: "Sběratelský zlatý míč", price: 1490, desc: "Limitovaná edice v luxusním designu pro opravdové fotbalové fanoušky." }
     ];
 
     // Funkce pro zobrazení produktů na stránce
     function renderProducts() {
         const container = document.getElementById('products');
-        container.innerHTML = ""; // Vyčištění kontejneru
+        container.innerHTML = ""; 
         
         productsData.forEach(product => {
             container.innerHTML += `
@@ -212,7 +212,6 @@
         const email = document.getElementById('email').value.trim();
         const phone = document.getElementById('phone').value.trim();
 
-        // Validace vyplnění kontaktů
         if (!name || !surname || !email || !phone) {
             alert("Prosím, vyplňte všechny kontaktní údaje (Jméno, Příjmení, E-mail a Telefon).");
             return;
@@ -236,7 +235,6 @@
             return;
         }
 
-        // Sestavení textu e-mailu dle zadání
         const recipient = "app@kostka-skola.cz";
         const subject = encodeURIComponent(`Objednávka - Fotbal Šťastný - ${name} ${surname}`);
         
@@ -249,12 +247,9 @@
         bodyText += `Celková cena: ${totalPrice} Kč\n`;
 
         const body = encodeURIComponent(bodyText);
-
-        // Otevření lokálního e-mailového klienta
         window.location.href = `mailto:${recipient}?subject=${subject}&body=${body}`;
     }
 
-    // Spuštění vykreslení produktů při načtení stránky
     window.onload = renderProducts;
 </script>
 </body>
